@@ -37,18 +37,16 @@ jobs:
                 --region us-east-1
         - run:
             name: Get IP
-            working_directory: ./.circleci/ansible
             command: |
               aws ec2 describe-instances \
                 --query 'Reservations[*].Instances[*].PublicIpAddress' \
                 --filters "Name=tag:Project,Values=Ex16" \
-                --output text >> inventory
-              cat inventory 
-        
+                --output text >> inventory.txt
+              cat inventory.txt 
         - persist_to_workspace:
-            root: .
+            root: ~/
             paths:
-              - .circleci/ansible/inventory
+              - inventory.txt
 
   # Exercise: Config and Deployment
   configure_infrastructure: 
@@ -64,15 +62,17 @@ jobs:
             command: |
               # Install Ansible
               apk add --update ansible
+        - attach_workspace:
+            at: ~/ 
         - run:
             name: Run Playbook and Configure server
-            working_directory: ./.circleci/ansible
             command: |
               # Your command
+              cd ~/
               pwd
               ls -ltr
-              cat inventory
-              ansible-playbook -i inventory playbook.yml
+              cat inventory.txt
+              ansible-playbook -i inventory.txt playbook.yml
 
    # Exercise: Smoke Testing
   smoke_test:
