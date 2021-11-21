@@ -38,15 +38,17 @@ jobs:
         - run:
             name: Get IP
             command: |
+              echo [all] > inventory.txt
               aws ec2 describe-instances \
                 --query 'Reservations[*].Instances[*].PublicIpAddress' \
                 --filters "Name=tag:Project,Values=Ex16" \
-                --output text >> inventory.txt
-              cat inventory.txt 
+                --output text > inv.txt
+              cat inv.txt >> inventory.txt 
         - persist_to_workspace:
             root: .
             paths:
               - inventory.txt
+              - inv.txt
 
   # Exercise: Config and Deployment
   configure_infrastructure: 
@@ -79,10 +81,13 @@ jobs:
       - image: alpine:latest
     steps:
       - run: apk add --update curl
+      - attach_workspace:
+          at: . 
       - run:
           name: smoke test
           command: |
-            URL="http://ec2-44-197-188-139.compute-1.amazonaws.com:3000/"
+            DNS=$(cat inv.txt)
+            URL="http://${DNS}:3000/"
             # Test if website exists
             if curl -s --head ${URL} 
             then
