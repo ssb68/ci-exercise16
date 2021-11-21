@@ -69,6 +69,8 @@ jobs:
             working_directory: ./.circleci/ansible
             command: |
               # Your command
+              pwd
+              ls -ltr
               cat inventory
               ansible-playbook -i inventory playbook.yml
 
