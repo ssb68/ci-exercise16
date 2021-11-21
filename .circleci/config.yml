@@ -15,8 +15,29 @@ jobs:
                 --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
                 --region us-east-1
 
+  # Exercise: Config and Deployment
+  configure_infrastructure: 
+      docker:
+        - image: python:3.1-alpha3.11 
+      steps:
+        - checkout
+        - add_ssh_keys:
+            # You can get this ID in the section where you registered the SSH Key
+            fingerprints: ["10:61:99:49:c2:88:81:f1:58:05:48:92:68:52:af:18"] 
+        - run:
+            name: Install dependencies
+            command: |
+            # Install Ansible
+            apt add --update ansible
+        - run:
+            name: Run Playbook and Configure server
+            command: |
+              # Your command
+              ansible-playbook -i inventory playbook.yml
+
 # Sequential workflow
 workflows:
   my_workflow:
       jobs:
-        - create_infrastructure
+        - configure_infrastructure
+        #- create_infrastructure
