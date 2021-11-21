@@ -18,7 +18,7 @@ jobs:
   # Exercise: Config and Deployment
   configure_infrastructure: 
       docker:
-        - image: python:3.1-alpha3.11 
+        - image: python:3.7-alpine.11 
       steps:
         - checkout
         - add_ssh_keys:
