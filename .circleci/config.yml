@@ -13,7 +13,7 @@ commands:
           # ${CIRCLE_WORKFLOW_ID} is a Built-in environment variable 
           # ${CIRCLE_WORKFLOW_ID:0:5} takes the first 5 chars of the variable CIRCLE_CI_WORKFLOW_ID 
           command: |
-            aws cloudformation delete-stack --stack-name ${CIRCLE_WORKFLOW_ID}
+            aws cloudformation delete-stack --stack-name steve${CIRCLE_WORKFLOW_ID:0:5}
           when: << parameters.when >>
 
 # Define the jobs we want to run for this project
@@ -33,7 +33,7 @@ jobs:
             command: |
               aws cloudformation deploy \
                 --template-file template.yml \
-                --stack-name ${CIRCLE_WORKFLOW_ID} \
+                --stack-name steve${CIRCLE_WORKFLOW_ID:0:5} \
                 --region us-east-1
         - run:
             name: Get IP
