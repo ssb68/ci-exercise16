@@ -25,7 +25,7 @@ jobs:
         - checkout
         - run:
             name: Add TAR
-            # becuase for some unkown reason the AWS image does not have tar and iots need to use workspace file sharing
+            # because for some unkown reason the AWS image does not have tar and iots need to use workspace file sharing
             command: |
               yum install -y tar gzip
         - run:
@@ -44,7 +44,7 @@ jobs:
                 --output text >> inventory.txt
               cat inventory.txt 
         - persist_to_workspace:
-            root: ~/
+            root: .
             paths:
               - inventory.txt
 
@@ -63,12 +63,11 @@ jobs:
               # Install Ansible
               apk add --update ansible
         - attach_workspace:
-            at: ~/ 
+            at: . 
         - run:
             name: Run Playbook and Configure server
             command: |
               # Your command
-              cd ~/
               pwd
               ls -ltr
               cat inventory.txt
