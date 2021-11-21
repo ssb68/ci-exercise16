@@ -13,7 +13,7 @@ commands:
           # ${CIRCLE_WORKFLOW_ID} is a Built-in environment variable 
           # ${CIRCLE_WORKFLOW_ID:0:5} takes the first 5 chars of the variable CIRCLE_CI_WORKFLOW_ID 
           command: |
-            aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5}
+            aws cloudformation delete-stack --stack-name ${CIRCLE_WORKFLOW_ID}
           when: << parameters.when >>
 
 # Define the jobs we want to run for this project
@@ -33,7 +33,7 @@ jobs:
             command: |
               aws cloudformation deploy \
                 --template-file template.yml \
-                --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
+                --stack-name ${CIRCLE_WORKFLOW_ID} \
                 --region us-east-1
         - run:
             name: Get IP
@@ -90,7 +90,7 @@ jobs:
             ls -ltr 
             cat inv.txt
             DNS=`(cat inv.txt)`
-            URL="http://${DNS}:3000/"
+            URL="http://${DNS}:5000/"
             # Test if website exists
             if curl -s --head ${URL} 
             then
