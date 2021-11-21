@@ -14,6 +14,20 @@ jobs:
                 --template-file template.yml \
                 --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
                 --region us-east-1
+        - run:
+            name: Get IP
+            working_directory: ./.circleci/ansible
+            command: |
+              aws ec2 describe-instances \
+                --query 'Reservations[*].Instances[*].PublicIpAddress' \
+                --filters "Name=tag:Project,Values=Ex16" \
+                --output text >> inventory
+              cat inventory 
+        
+        - persist_to_workspace:
+          root: .
+          paths:
+            - .circleci/ansible/inventory
 
   # Exercise: Config and Deployment
   configure_infrastructure: 
@@ -31,13 +45,51 @@ jobs:
               apk add --update ansible
         - run:
             name: Run Playbook and Configure server
+            working_directory: ./.circleci/ansible
             command: |
               # Your command
+              cat inventory
               ansible-playbook -i inventory playbook.yml
+
+  # Exercise - Rollback
+  destroy_environment:
+    steps:
+      - run:
+          name: Destroy environment
+          # ${CIRCLE_WORKFLOW_ID} is a Built-in environment variable 
+          # ${CIRCLE_WORKFLOW_ID:0:5} takes the first 5 chars of the variable CIRCLE_CI_WORKFLOW_ID 
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5}
+
+  # Exercise: Smoke Testing
+  smoke_test:
+    docker:
+      - image: alpine:latest
+    steps:
+      - run: apk add --update curl
+      - run:
+          name: smoke test
+          command: |
+            URL="http://ec2-44-197-188-139.compute-1.amazonaws.com:3000/"
+            # Test if website exists
+            if curl -s --head ${URL} 
+            then
+              return 0
+            else
+              return 1
+            fi
+      - destroy_environment
+        when: on_fail
 
 # Sequential workflow
 workflows:
   my_workflow:
       jobs:
+        - create_infrastructure
         - configure_infrastructure
-        #- create_infrastructure
+            requires:
+              - create_infrastructure
+        - smoke_test
+            requires:
+              - configure_infrastructure             
