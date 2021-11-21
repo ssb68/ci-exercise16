@@ -86,7 +86,10 @@ jobs:
       - run:
           name: smoke test
           command: |
-            DNS=$(cat inv.txt)
+            pwd
+            ls -ltr 
+            cat inv.txt
+            DNS=`(cat inv.txt)`
             URL="http://${DNS}:3000/"
             # Test if website exists
             if curl -s --head ${URL} 
@@ -95,8 +98,8 @@ jobs:
             else
               return 1
             fi
-      #- destroy_environment:
-      #    when: on_fail
+      - destroy_environment
+          when: on_fail
 
 # Sequential workflow
 workflows:
