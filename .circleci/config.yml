@@ -28,7 +28,6 @@ jobs:
             # becuase for some unkown reason the AWS image does not have tar and iots need to use workspace file sharing
             command: |
               yum install -y tar gzip
-              which tar
         - run:
             name: Create Cloudformation Stack
             command: |
