@@ -98,12 +98,12 @@ jobs:
             else
               return 1
             fi
-      - run:
-          name: on error
-          command: echo "Hello Error!"
-          when: on_fail
-     # - destroy_environment:
+     # - run:
+     #     name: on error
+     #     command: echo "Hello Error!"
      #     when: on_fail
+      - destroy_environment:
+          when: on_fail
 
 # Sequential workflow
 workflows:
