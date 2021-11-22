@@ -54,7 +54,8 @@ jobs:
   # Exercise: Config and Deployment
   configure_infrastructure: 
       docker:
-        - image: python:3.7-alpine3.11 
+        - image: python:3.9.0-alpine
+        #        python:3.7-alpine3.11 
       steps:
         - checkout
         - add_ssh_keys:
@@ -75,11 +76,14 @@ jobs:
               ls -ltr
               cat inventory.txt
               ansible-playbook -i inventory.txt playbook.yml
+        - destroy_environment:
+            when: on_fail
+        
 
    # Exercise: Smoke Testing
   smoke_test:
     docker:
-      - image: [alpine:latest, amazon/aws-cli]
+      - image: python:3.9.0-alpine
     steps:
       - run: apk add --update curl
       - attach_workspace:
