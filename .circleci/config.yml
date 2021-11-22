@@ -6,8 +6,6 @@ commands:
     parameters:
       when:
         type: string
-    docker:
-      - image: amazon/aws-cli    
     steps:
       - run:
           name: Destroy environment
@@ -33,7 +31,7 @@ jobs:
             name: Create Cloudformation Stack
             command: |
               aws cloudformation deploy \
-                --template-file template.yml \
+                --template-file tem3plate.yml \
                 --stack-name steve${CIRCLE_WORKFLOW_ID:0:5} \
                 --region us-east-1
         - run:
@@ -50,6 +48,8 @@ jobs:
             paths:
               - inventory.txt
               - inv.txt
+        - destroy_environment:
+            when: on_fail
 
   # Exercise: Config and Deployment
   configure_infrastructure: 
@@ -91,7 +91,7 @@ jobs:
             ls -ltr 
             cat inv.txt
             DNS=`(cat inv.txt)`
-            URL="http://${DNS}:5000/"
+            URL="http://${DNS}:3000/"
             # Test if website exists
             if curl -s --head ${URL} 
             then
