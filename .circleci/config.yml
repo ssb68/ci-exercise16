@@ -83,36 +83,38 @@ jobs:
 
    # Exercise: Smoke Testing
   smoke_test:
-    docker:
-      - image: amazon/aws-cli
-    steps:
-      - run:
-        name: Add TAR
-        # because for some unkown reason the AWS image does not have tar and iots need to use workspace file sharing
-        command: |
-          yum install -y tar gzip
-      - run:
-        command: |  
-          yum install -y curl
-      - attach_workspace:
-          at: . 
-      - run:
-          name: smoke test
+      docker:
+        - image: amazon/aws-cli
+      steps:
+        - checkout
+        - run:
+          name: Add TAR
+          # because for some unkown reason the AWS image does not have tar and iots need to use workspace file sharing
           command: |
-            pwd
-            ls -ltr 
-            cat inv.txt
-            DNS=`(cat inv.txt)`
-            URL="http://${DNS}:5000/"
-            # Test if website exists
-            if curl -s --head ${URL} 
-            then
-              return 0
-            else
-              return 1
-            fi
-      - destroy_environment:
-          stackId: ${CIRCLE_WORKFLOW_ID:0:7}
+            yum install -y tar gzip
+        - run:
+          name: Add curl
+          command: |  
+            yum install -y curl
+        - attach_workspace:
+            at: . 
+        - run:
+            name: smoke test
+            command: |
+              pwd
+              ls -ltr 
+              cat inv.txt
+              DNS=`(cat inv.txt)`
+              URL="http://${DNS}:5000/"
+              # Test if website exists
+              if curl -s --head ${URL} 
+              then
+                return 0
+              else
+                return 1
+              fi
+        - destroy_environment:
+            stackId: ${CIRCLE_WORKFLOW_ID:0:7}
 
 # Sequential workflow
 workflows:
