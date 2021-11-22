@@ -31,7 +31,7 @@ jobs:
             name: Create Cloudformation Stack
             command: |
               aws cloudformation deploy \
-                --template-file tem3plate.yml \
+                --template-file template.yml \
                 --stack-name steve${CIRCLE_WORKFLOW_ID:0:5} \
                 --region us-east-1
         - run:
@@ -79,7 +79,7 @@ jobs:
    # Exercise: Smoke Testing
   smoke_test:
     docker:
-      - image: alpine:latest
+      - image: [alpine:latest, amazon/aws-cli]
     steps:
       - run: apk add --update curl
       - attach_workspace:
@@ -91,7 +91,7 @@ jobs:
             ls -ltr 
             cat inv.txt
             DNS=`(cat inv.txt)`
-            URL="http://${DNS}:3000/"
+            URL="http://${DNS}:5000/"
             # Test if website exists
             if curl -s --head ${URL} 
             then
