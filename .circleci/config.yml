@@ -4,6 +4,9 @@ version: 2.1
 commands:
   # Exercise - Rollback
   destroy_environment:
+    parameters:
+      stackId:
+        type: string
     steps:
       - run:
           name: Destroy environment
@@ -11,7 +14,7 @@ commands:
           # ${CIRCLE_WORKFLOW_ID:0:5} takes the first 5 chars of the variable CIRCLE_CI_WORKFLOW_ID 
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name steve${CIRCLE_WORKFLOW_ID:0:5}
+            aws cloudformation delete-stack --stack-name ${stackId}
             
 # Define the jobs we want to run for this project
 jobs:
@@ -30,7 +33,7 @@ jobs:
             command: |
               aws cloudformation deploy \
                 --template-file template.yml \
-                --stack-name steve${CIRCLE_WORKFLOW_ID:0:5} \
+                --stack-name ${CIRCLE_WORKFLOW_ID:0:7} \
                 --region us-east-1
         - run:
             name: Get IP
@@ -46,7 +49,8 @@ jobs:
             paths:
               - inventory.txt
               - inv.txt
-        - destroy_environment
+        - destroy_environment:
+            stackId: ${CIRCLE_WORKFLOW_ID:0:7}
 
   # Exercise: Config and Deployment
   configure_infrastructure: 
@@ -73,15 +77,23 @@ jobs:
               ls -ltr
               cat inventory.txt
               ansible-playbook -i inventory.txt playbook.yml
-        - destroy_environment
+        - destroy_environment:
+            stackId: ${CIRCLE_WORKFLOW_ID:0:7}
         
 
    # Exercise: Smoke Testing
   smoke_test:
     docker:
-      - image: alpine:latest
+      - image: amazon/aws-cli
     steps:
-      - run: apk add --update curl
+      - run:
+        name: Add TAR
+        # because for some unkown reason the AWS image does not have tar and iots need to use workspace file sharing
+        command: |
+          yum install -y tar gzip
+      - run:
+        command: |  
+          yum install -y curl
       - attach_workspace:
           at: . 
       - run:
@@ -99,11 +111,8 @@ jobs:
             else
               return 1
             fi
-     # - run:
-     #     name: on error
-     #     command: echo "Hello Error!"
-     #     when: on_fail
       - destroy_environment
+          stackId: ${CIRCLE_WORKFLOW_ID:0:7}
 
 # Sequential workflow
 workflows:
