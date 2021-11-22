@@ -79,23 +79,22 @@ jobs:
               ansible-playbook -i inventory.txt playbook.yml
         - destroy_environment:
             stackId: ${CIRCLE_WORKFLOW_ID:0:7}
-        
 
-   # Exercise: Smoke Testing
+  # Exercise: Smoke Testing
   smoke_test:
       docker:
         - image: amazon/aws-cli
       steps:
         - checkout
         - run:
-          name: Add TAR
-          # because for some unkown reason the AWS image does not have tar and iots need to use workspace file sharing
-          command: |
-            yum install -y tar gzip
+            name: Add TAR
+            # because for some unkown reason the AWS image does not have tar and iots need to use workspace file sharing
+            command: |
+              yum install -y tar gzip
         - run:
-          name: Add curl
-          command: |  
-            yum install -y curl
+            name: Add curl
+            command: |
+              yum install -y curl
         - attach_workspace:
             at: . 
         - run:
